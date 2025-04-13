@@ -5,34 +5,37 @@
 #include <stdint.h>
 #include "VirtualSerial.h"
 
-float PID(float erreur) {
-    // Constantes PID (à ajuster selon le système)
-    static const float Kp = 1.0f;   // Gain proportionnel
-    static const float Ki = 0.1f;   // Gain intégral
+float PID(float consigne, float freq_mesure) {
+    static const float Kp = 1.2f;   // Gain proportionnel
+    static const float Ki = 1.2f;   // Gain intégral
     static const float Kd = 0.01f;  // Gain dérivé
-    static const float dt = 0.01f;  // Période d'échantillonnage [s]
 
-    // Variables d'état statiques (mémorisées entre les appels)
     static float integrale = 0.0f;
     static float erreur_avant = 0.0f;
+    static float dt =1.0f;
 
-    // Terme intégral (avec anti-windup)
+    // Calcul de l'erreur
+    float erreur = freq_mesure;
     integrale += erreur * dt;
-    if (integrale > 100.0f)      integrale = 100.0f;  // Limite haute
-    else if (integrale < -100.0f) integrale = -100.0f; // Limite basse
-
-    // Terme dérivé
+    sature_integrale(&integrale);
     float derivee = (erreur - erreur_avant) / dt;
-
-    // Calcul de la commande PID
-    float commande = Kp * erreur + Ki * integrale + Kd * derivee;
-
-    // Saturation de la commande (ex: 0-100%)
-    if (commande > 100.0f)      commande = 100.0f;
-    else if (commande < 0.0f)   commande = 0.0f;
-
-    // Mise à jour pour l'itération suivante
+    //float commande_pwm = Kp * (erreur-erreur_avant) + Ki * erreur +consigne;//integrale + Kd * derivee;
+    float commande_pwm = Kp * erreur + Ki * integrale + Kd * derivee;
+    commande_pwm = sature_commande(commande_pwm);
     erreur_avant = erreur;
+    return commande_pwm;
+}
 
+// Fonction limite l'intégrale
+void sature_integrale(float *integrale) {
+    const float integrale_max = 1000.0f;
+    if (*integrale > integrale_max) *integrale = integrale_max;
+    else if (*integrale < -integrale_max) *integrale = -integrale_max;
+}
+
+// Fonction de saturation de la commande PWM
+float sature_commande(float commande) {
+    if (commande > 50.0f) return 50.0f; //limite de 1023 (8bits)
+    if (commande < -50.0f) return -50.0f;
     return commande;
 }

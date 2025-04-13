@@ -3,7 +3,8 @@ DFU=dfu-programmer
 TARGET=main
 FCT=USB
 FCT1=PID
-FCT2=Descriptors
+FCT2=erreur
+FCT3=init_PWM_PD7
 REP=/media/etudiant/AUBERTIN/scolarite/L3/EP2/c/TP3/lufa/
 REPEEA=/media/etudiant/AUBERTIN/scolarite/L3/EP2/c/TP6/lib_atmega/
 
@@ -27,6 +28,10 @@ $(FCT1).o: $(FCT1).c $(FCT1).h
 $(FCT2).o: $(FCT2).c $(FCT2).h
 	avr-gcc -Wall -g -mmcu=$(MCU) -I$(REP)/VirtualSerial/ -I$(REP)/VirtualSerial_example/ -I$(REP)/lufa-LUFA-140928/ -I$(REPEEA)/include/ -DF_USB=16000000UL \
 	-std=gnu99 -Os -c $(FCT2).c
+	
+$(FCT3).o: $(FCT3).c $(FCT3).h
+	avr-gcc -Wall -g -mmcu=$(MCU) -I$(REP)/VirtualSerial/ -I$(REP)/VirtualSerial_example/ -I$(REP)/lufa-LUFA-140928/ -I$(REPEEA)/include/ -DF_USB=16000000UL \
+	-std=gnu99 -Os -c $(FCT3).c
 
 $(TARGET).o: $(TARGET).c
 	avr-gcc -Wall -g -mmcu=$(MCU) -I$(REP)/VirtualSerial/ -I$(REP)/VirtualSerial_example/ -I$(REP)/lufa-LUFA-140928/ -I$(REPEEA)/include/ -DF_USB=16000000UL \
